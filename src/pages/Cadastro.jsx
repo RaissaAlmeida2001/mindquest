@@ -4,6 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Heart, Film, Music, Activity } from "lucide-react";
+import { auth, db } from "../firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, collection, addDoc } from "firebase/firestore";
 
 const schema = z.object({
   nome: z.string().min(3, "Como podemos te chamar?"),
@@ -22,11 +25,48 @@ export default function Cadastro() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    console.log("Perfil do Usuário para IA:", data);
-    // Aqui você enviaria para o banco de dados
-    navigate("/login");
-  };
+  const onSubmit = async (data) => {
+  try {
+    // 1. Cria o usuário no Firebase Authentication
+    const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.senha);
+    const user = userCredential.user;
+
+    // 2. Cria o documento principal do Usuário no Firestore usando o UID
+    await setDoc(doc(db, "usuarios", user.uid), {
+      idUsuario: user.uid,
+      nome: data.nome,
+      email: data.email,
+      tipoPerfil: "comum",
+      moedas: 0,
+      nivel: 1,
+      xp: 0,
+      dataCadastro: new Date()
+    });
+
+    // 3. Salva as respostas detalhadas na subcoleção para a IA analisar
+    // Usamos um Map para as respostas conforme sua estrutura de "index"
+    const respostasMap = {
+      0: data.objetivoPrincipal,
+      1: data.condicaoPrevia,
+      2: data.generoMusical,
+      3: data.generoFilme,
+      4: data.atividadeRelaxante
+    };
+
+    await addDoc(collection(db, "usuarios", user.uid, "respostasFormulario"), {
+      idFormulario: "questionarioInicial",
+      dataPreenchimento: new Date(),
+      respostas: respostasMap
+    });
+
+    console.log("Usuário e preferências salvos com sucesso!");
+    navigate("/humor");
+
+  } catch (error) {
+    console.error("Erro ao cadastrar:", error.message);
+    alert("Erro ao criar conta: " + error.message);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 p-6 md:p-10">
