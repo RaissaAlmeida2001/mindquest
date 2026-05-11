@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 :root {
   --color-1: #F5DACA;
   --color-2: #ECC3A9;
@@ -14,18 +15,32 @@
   --peach-shadow: 0 4px 12px rgba(255, 155, 125, 0.25);
 }
  
+=======
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
+<<<<<<< HEAD
  
 body {
   background: linear-gradient(135deg, #fef3f1, var(--accent-bg));
   min-height: 100vh;
 }
  
+=======
+
+
+body {
+  background: linear-gradient(135deg, #d9fdd3, #f3fef1);
+  min-height: 100vh;
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .container {
   min-height: 100vh;
   display: flex;
@@ -33,21 +48,35 @@ body {
   justify-content: center;
   padding: 20px;
 }
+<<<<<<< HEAD
  
+=======
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .card {
   background: #ffffff;
   width: 100%;
   max-width: 380px;
   border-radius: 24px;
   padding: 24px;
+<<<<<<< HEAD
   box-shadow: var(--peach-shadow);
   animation: fadeIn 0.4s ease;
 }
  
+=======
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  animation: fadeIn 0.4s ease;
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .title {
   font-size: 22px;
   font-weight: 700;
   text-align: center;
+<<<<<<< HEAD
   color: var(--text-h);
   margin-bottom: 10px;
 }
@@ -59,10 +88,25 @@ body {
   margin-bottom: 20px;
 }
  
+=======
+  color: #2e7d32;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 14px;
+  text-align: center;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .input {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
+<<<<<<< HEAD
   border: 1px solid var(--border);
   margin-bottom: 12px;
   transition: 0.2s;
@@ -74,50 +118,98 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 155, 125, 0.2);
 }
  
+=======
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+  transition: 0.2s;
+}
+
+.input:focus {
+  border-color: #66bb6a;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102,187,106,0.2);
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .button-primary {
   width: 100%;
   padding: 14px;
   border-radius: 14px;
+<<<<<<< HEAD
   background: linear-gradient(135deg, var(--accent-border), var(--accent));
+=======
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
   color: white;
   font-weight: 600;
   border: none;
   cursor: pointer;
   transition: 0.3s;
 }
+<<<<<<< HEAD
  
 .button-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(255, 155, 125, 0.3);
 }
  
+=======
+
+.button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(67,160,71,0.3);
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .button-secondary {
   width: 100%;
   padding: 14px;
   border-radius: 14px;
+<<<<<<< HEAD
   border: 2px solid var(--accent);
   background: transparent;
   color: var(--accent);
+=======
+  border: 2px solid #66bb6a;
+  background: transparent;
+  color: #43a047;
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
   font-weight: 600;
   cursor: pointer;
   margin-top: 10px;
 }
+<<<<<<< HEAD
  
 .button-secondary:hover {
   background: var(--accent-bg);
 }
  
+=======
+
+.button-secondary:hover {
+  background: #e8f5e9;
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .mood-container {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
 }
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .mood {
   font-size: 28px;
   cursor: pointer;
   transition: 0.2s;
 }
+<<<<<<< HEAD
  
 .mood:hover {
   transform: scale(1.2);
@@ -128,15 +220,37 @@ body {
   filter: drop-shadow(0 0 6px var(--accent));
 }
  
+=======
+
+.mood:hover {
+  transform: scale(1.2);
+}
+
+.mood.selected {
+  transform: scale(1.3);
+  filter: drop-shadow(0 0 6px rgba(102,187,106,0.6));
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 .textarea {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
+<<<<<<< HEAD
   border: 1px solid var(--border);
   resize: none;
   margin-bottom: 16px;
 }
  
+=======
+  border: 1px solid #ddd;
+  resize: none;
+  margin-bottom: 16px;
+}
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -147,12 +261,21 @@ body {
     transform: translateY(0);
   }
 }
+<<<<<<< HEAD
  
+=======
+
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
 @media (max-width: 400px) {
   .card {
     padding: 18px;
   }
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
   .title {
     font-size: 20px;
   }

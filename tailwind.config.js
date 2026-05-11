@@ -5,6 +5,7 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+<<<<<<< HEAD
     extend: {
       colors: {
         peach: {
@@ -16,6 +17,9 @@ export default {
         },
       },
     },
+=======
+    extend: {},
+>>>>>>> 2fa68e32e27da4dc4d3bcfec5eff74c03b56d002
   },
   plugins: [],
 }
