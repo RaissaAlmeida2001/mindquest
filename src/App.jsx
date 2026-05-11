@@ -4,6 +4,8 @@ import Cadastro from "./pages/Cadastro";
 import Login from "./pages/Login";
 import Humor from "./pages/Humor";
 import Calendario from "./pages/Calendario"; // 1. Certifique-se de importar aqui!
+import Menu from "./pages/Menu"
+
 
 function App() {
   return (
@@ -14,6 +16,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/humor" element={<Humor />} />
         <Route path="/calendario" element={<Calendario />} />
+        <Route path="/menu" element={<Menu />} />
       </Routes>
     </Router>
   );
