@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { 
   Sparkles, ChevronRight, User, Settings, 
-  Brain, Activity, TrendingUp, Heart, Clock
+  Activity, TrendingUp, Heart, Clock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import logoReduzido from "../assets/LogoPessegoReduzido.png";
 
 const LogoPrincipal = () => (
-  <div className="bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm flex items-center justify-center">
-    <Brain className="text-[#E97451]" size={24} />
+  <div className="bg-white p-0.2 rounded-xl border border-slate-100 shadow-sm flex items-center justify-center w-12 h-12">
+    <img 
+      src={logoReduzido} 
+      alt="MindQuest Logo" 
+      className="w-full h-full object-contain" 
+    />
   </div>
 );
 

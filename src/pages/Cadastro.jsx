@@ -55,7 +55,7 @@ export default function Cadastro() {
         respostas: respostasMap
       });
 
-      navigate("/humor");
+      navigate("/Menu");
     } catch (error) {
       alert("Erro ao criar conta: " + error.message);
     }

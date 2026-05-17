@@ -17,7 +17,7 @@ export default function AnimatedBrainLogo() {
       <img 
         src="/src/assets/LogoPessegoPrincipal.png" 
         alt="MindQuest Cérebro Logo" 
-        className="w-56 h-56 md:w-72 md:h-72 object-contain filter drop-shadow-[0_20px_30px_rgba(34,197,94,0.3)]"
+        className="w-56 h-56 md:w-72 md:h-72 object-contain filter drop-shadow-[0_20px_30px_rgba(236,195,169,0.3)]"
         onError={(e) => {
           e.target.onerror = null; 
           e.target.src="https://via.placeholder.com/300?text=Cerebro+MindQuest";
