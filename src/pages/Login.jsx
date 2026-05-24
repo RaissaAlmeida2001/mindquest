@@ -19,7 +19,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, email, senha);
 
       console.log("Login realizado com sucesso!");
-      navigate("/Menu");
+      navigate("/humor");
 
     } catch (error) {
       console.error("Erro ao entrar:", error.code);
@@ -131,6 +131,15 @@ export default function Login() {
             className="font-bold text-[#FF9B7D] hover:underline"
           >
             Cadastre-se
+          </button>
+        </p>
+
+        <p className="text-center mt-6 text-sm text-[#9A6A58]">
+          <button
+            onClick={() => navigate("/senha")}
+            className="font-bold text-[#FF9B7D] hover:underline"
+          >
+            Esqueci a Senha
           </button>
         </p>
 
