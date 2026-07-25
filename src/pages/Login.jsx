@@ -19,7 +19,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, email, senha);
 
       console.log("Login realizado com sucesso!");
-      navigate("/humor");
+      navigate("/Menu");
 
     } catch (error) {
       console.error("Erro ao entrar:", error.code);

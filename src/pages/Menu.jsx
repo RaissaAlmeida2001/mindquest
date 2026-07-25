@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { 
-  Sparkles, ChevronRight, User, Settings, 
-  Activity, TrendingUp, Heart, Clock
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, ChevronRight, User, Settings, Activity, TrendingUp, Heart, Clock, PartyPopper } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useLocation } from "react-router-dom";
 import logoReduzido from "../assets/LogoPessegoReduzido.png";
+
+import { db, auth } from "../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 const LogoPrincipal = () => (
   <div className="bg-white p-0.2 rounded-xl border border-slate-100 shadow-sm flex items-center justify-center w-12 h-12">
@@ -17,7 +19,59 @@ const LogoPrincipal = () => (
 );
 
 export default function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
+  const [loadingCheck, setLoadingCheck] = useState(true);
+
+  // Validação no Banco de Dados
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
+      async function checaFormulario() {
+        try {
+
+          if (location.state?.justCompletedForm) {
+            setIsModalOpen(false);
+            setIsWelcomeModalOpen(true);
+            window.history.replaceState({}, document.title);
+          } else {
+
+            const docRef = doc(db, "usuarios", user.uid, "respostasFormulario", "onboarding");
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+              setIsModalOpen(false);
+            } else {
+              setIsModalOpen(true);
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao verificar respostas do formulário:", error);
+        } finally {
+          setLoadingCheck(false);
+        }
+      }
+      checaFormulario();
+    });
+
+    return () => unsubscribe();
+  }, [navigate, location]);
+
+  const handleIrParaFormulario = () => {
+    setIsModalOpen(false);
+    navigate("/formulario");
+  };
+
+  const handleFecharBoasVindas = () => {
+    setIsWelcomeModalOpen(false);
+  };
 
   // Dados zerados para o primeiro acesso
   const humorSemanalVazio = [
@@ -29,6 +83,16 @@ export default function Home() {
     { dia: "Sab", nivel: 0 },
     { dia: "Dom", nivel: 0 },
   ];
+
+  if (loadingCheck) {
+    return (
+      <div className="min-h-screen bg-[#FFFBF9] flex items-center justify-center">
+        <p className="text-slate-400 text-sm font-semibold">Carregando MindQuest...</p>
+      </div>
+    );
+  }
+
+  const isAnyModalOpen = isModalOpen || isWelcomeModalOpen;
 
   return (
     <div className="min-h-screen bg-[#FFFBF9] flex flex-col antialiased text-slate-800 font-sans overflow-x-hidden">
@@ -47,7 +111,7 @@ export default function Home() {
       </header>
 
       {/* DASHBOARD ZERADO */}
-      <main className={`pt-24 px-6 pb-10 space-y-8 transition-all duration-700 ${isModalOpen ? 'blur-[1.5px] opacity-70 scale-[0.99]' : 'blur-0'}`}>
+      <main className={`pt-24 px-6 pb-10 space-y-8 transition-all duration-700 ${isAnyModalOpen ? 'blur-[1.5px] opacity-70 scale-[0.99]' : 'blur-0'}`}>
         
         <div className="space-y-1">
           <p className="text-[#E97451] font-bold text-[10px] uppercase tracking-widest">Primeiro acesso</p>
@@ -140,7 +204,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* POP-UP */}
+      {/* POP-UP 1: PARA QUEM NÃO RESPONDEU O FORMULÁRIO */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
@@ -163,7 +227,7 @@ export default function Home() {
                 Para que o MindQuest ofereça a melhor experiência, precisamos te conhecer um pouco melhor.
               </p>
               <button 
-                onClick={() => setIsModalOpen(false)} 
+                onClick={handleIrParaFormulario}
                 className="w-full bg-[#E97451] hover:bg-[#C06043] text-white font-bold py-5 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 group"
               >
                 <span>VAMOS LÁ</span>
@@ -173,6 +237,42 @@ export default function Home() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* POP-UP 2: QUANDO ACABA DE FINALIZAR O FORMULÁRIO */}
+      <AnimatePresence>
+        {isWelcomeModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/10 backdrop-blur-[1.5px]" 
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 30 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              className="relative bg-white/95 w-full max-w-sm rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 border border-white text-center"
+            >
+              <div className="bg-[#FFF1EB] w-20 h-20 rounded-[2.2rem] flex items-center justify-center mx-auto mb-8 border border-orange-100 shadow-inner">
+                <PartyPopper className="text-[#E97451]" size={40} />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 mb-4 leading-tight">Tudo pronto! 🎉</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-10 px-2">
+                Aproveite o <strong className="text-[#E97451]">MindQuest</strong> para registrar suas atividades e pensamentos!
+              </p>
+              <button 
+                onClick={handleFecharBoasVindas}
+                className="w-full bg-[#E97451] hover:bg-[#C06043] text-white font-bold py-5 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 group"
+              >
+                <span>VAMOS LÁ</span>
+                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
