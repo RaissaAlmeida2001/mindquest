@@ -1,70 +1,26 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar as CalendarIcon,
-  ArrowLeft,
-  X,
-  Trash2,
-  Edit3,
-  Sun,
-  Tag,
-  Lock,
-  Video,
-  Clock as ClockIcon,
-  User as UserIcon,
-  CalendarX,
-  CalendarClock,
-  CalendarDays,
-  Check
+import { 
+  ChevronLeft, ChevronRight, Calendar as CalendarIcon, 
+  X, Edit3, Sun, Tag, Lock, Sparkles 
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import { auth, db } from "../../firebaseConfig";
-import { collection, query, getDocs, deleteDoc, doc, orderBy } from "firebase/firestore";
+import { collection, query, getDocs, orderBy } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+
 import { toast } from "sonner";
 import BottomNav from "../../components/BottomNav";
-
-const sessoesMockIniciais = [
-  {
-    id: "sessao_1",
-    dia: 15, 
-    horario: "14:30",
-    psicologo: "Dra. Juliana Mendes",
-    especialidade: "Terapia Cognitivo-Comportamental",
-    linkSala: "/SalaSessao" 
-  },
-  {
-    id: "sessao_2",
-    dia: 28, 
-    horario: "10:00",
-    psicologo: "Dr. Carlos Eduardo",
-    especialidade: "Psicanálise",
-    linkSala: "/SalaSessao"
-  }
-];
-
-const horariosDisponiveisMock = ["09:00", "10:30", "14:00", "15:30", "17:00"];
-
-const disponibilidadeDiasMock = {
-  10: false, 11: true, 12: true, 14: false, 16: true, 17: true, 
-  18: false, 20: true, 22: true, 25: false, 26: true, 29: true
-};
+import HeaderUsuario from "../../components/HeaderUsuario";
 
 export default function Calendario() {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [registroSelecionado, setRegistroSelecionado] = useState(null);
   
-  const [sessoes, setSessoes] = useState(sessoesMockIniciais);
-  const [diaSelecionado, setDiaSelecionado] = useState(null);
-
-  const [mostrarModalReagendar, setMostrarModalReagendar] = useState(false);
-  const [novaDataReagendamento, setNovaDataReagendamento] = useState(null);
-  const [novoHorarioReagendamento, setNovoHorarioReagendamento] = useState("");
-
   const fetchRegistros = async (user) => {
     try {
       const q = query(
@@ -78,7 +34,7 @@ export default function Calendario() {
         const data = documento.data();
         let dataRegistro;
         
-        if (data.data && typeof data.data.toDate === 'function') {
+        if (data.data && typeof data.data.toDate === "function") {
           dataRegistro = data.data.toDate();
         } else {
           dataRegistro = new Date(data.data);
@@ -94,8 +50,8 @@ export default function Calendario() {
 
       setRegistros(dadosMapeados);
     } catch (error) {
-      console.error("Erro ao buscar histórico:", error);
-      toast.error("Erro ao carregar seu histórico.");
+      console.error("Erro ao procurar histórico:", error);
+      toast.error("Erro ao carregar o histórico.");
     } finally {
       setLoading(false);
     }
@@ -115,54 +71,10 @@ export default function Calendario() {
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
-  const handleCancelarSessao = (idSessao) => {
-    if (window.confirm("Deseja realmente cancelar esta sessão? Lembre-se da política de 12h de antecedência.")) {
-      setSessoes(sessoes.filter(sessao => sessao.id !== idSessao));
-      setDiaSelecionado(null);
-      toast.success("Sessão cancelada com sucesso!");
-    }
-  };
-
-  const confirmarReagendamento = () => {
-    if (!novaDataReagendamento || !novoHorarioReagendamento) {
-      toast.error("Selecione uma data disponível e um horário para reagendar.");
-      return;
-    }
-
-    setSessoes(sessoes.map(s => {
-      if (s.id === diaSelecionado.sessao.id) {
-        return { ...s, dia: novaDataReagendamento, horario: novoHorarioReagendamento };
-      }
-      return s;
-    }));
-
-    toast.success("Sessão reagendada com sucesso!");
-    setMostrarModalReagendar(false);
-    setDiaSelecionado(null);
-    setNovaDataReagendamento(null);
-    setNovoHorarioReagendamento("");
-  };
-
-  const handleDeleteHumor = async () => {
-    if (!diaSelecionado || !diaSelecionado.registro) return;
-    const confirm = window.confirm("Tem certeza que deseja apagar este registro de humor?");
-    if (!confirm) return;
-
-    try {
-      const user = auth.currentUser;
-      await deleteDoc(doc(db, "usuarios", user.uid, "registrosHumor", diaSelecionado.registro.docId));
-      toast.success("Registro apagado com sucesso!");
-      setDiaSelecionado(null);
-      fetchRegistros(user); 
-    } catch (error) {
-      toast.error("Erro ao apagar o registro.");
-    }
-  };
-
-  const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+  const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
   const diasNoMes = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const primeiroDiaDoMes = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-  const nomeMes = currentDate.toLocaleString('pt-BR', { month: 'long' });
+  const nomeMes = currentDate.toLocaleString("pt-BR", { month: "long" });
   const ano = currentDate.getFullYear();
 
   const espacosVazios = Array.from({ length: primeiroDiaDoMes }, (_, i) => i);
@@ -170,7 +82,6 @@ export default function Calendario() {
   const diasFelizes = registros.filter(r => r.nivel >= 80).length;
 
   const verificarSeEhHoje = (dataRegistro) => {
-    if(!dataRegistro) return false;
     const hoje = new Date();
     return (
       dataRegistro.getDate() === hoje.getDate() &&
@@ -179,352 +90,212 @@ export default function Calendario() {
     );
   };
 
-  const abrirDetalhesDia = (dia, registroDoDia, sessaoDoDia) => {
-    if (registroDoDia || sessaoDoDia) {
-      setDiaSelecionado({
-        diaNumero: dia,
-        registro: registroDoDia,
-        sessao: sessaoDoDia
-      });
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-peach-100 via-white to-peach-300 p-6 antialiased text-gray-800 pb-32">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md mx-auto bg-white rounded-[2.5rem] shadow-2xl border border-white p-6 md:p-8 relative"
-      >
-        <div className="flex items-center justify-between mb-8">
-          <button onClick={() => navigate("/menu")} className="p-2 hover:bg-peach-100 rounded-full transition-colors">
-            <ArrowLeft className="size-6 text-peach-400" />
-          </button>
+    <div className="min-h-screen bg-app-bg p-3 sm:p-6 text-app-text antialiased font-sans pb-28 transition-colors duration-300">
+      
+      {/* Cabeçalho compartilhado do usuário */}
+      <HeaderUsuario />
 
-          <div className="text-center capitalize">
-            <h2 className="text-xl font-bold text-peach-500">{nomeMes} {ano}</h2>
-            <p className="text-[10px] text-peach-400 font-semibold uppercase tracking-widest">Seu Histórico e Sessões</p>
-          </div>
+      <div className="max-w-xl mx-auto space-y-4 sm:space-y-6">
 
-          <div className="flex gap-1">
-            <button onClick={prevMonth} className="p-2 text-peach-400 hover:text-peach-500 transition-colors"><ChevronLeft /></button>
-            <button onClick={nextMonth} className="p-2 text-peach-400 hover:text-peach-500 transition-colors"><ChevronRight /></button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="h-64 flex items-center justify-center text-peach-300 animate-pulse">Carregando calendário...</div>
-        ) : (
-          <>
-            <div className="grid grid-cols-7 gap-2 mb-8">
-              {diasSemana.map((dia) => (
-                <div key={dia} className="text-center text-[10px] font-bold text-peach-300 uppercase italic">
-                  {dia}
-                </div>
-              ))}
-
-              {espacosVazios.map((espaco) => (
-                <div key={`empty-${espaco}`} className="aspect-square" />
-              ))}
-
-              {diasArray.map((dia) => {
-                const registroDoDia = registros.find(r => r.dataRegistro.getDate() === dia);
-                const sessaoDoDia = sessoes.find(s => s.dia === dia); 
-
-                return (
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    key={dia}
-                    onClick={() => abrirDetalhesDia(dia, registroDoDia, sessaoDoDia)}
-                    className={`aspect-square relative flex flex-col items-center justify-center rounded-2xl text-sm font-medium transition-all ${(registroDoDia || sessaoDoDia) ? "cursor-pointer" : "cursor-default"}
-                    ${
-                      (registroDoDia || sessaoDoDia)
-                        ? "bg-peach-100 border border-peach-200 shadow-sm hover:shadow-md"
-                        : "bg-peach-50/50 text-peach-200 opacity-60"
-                    }`}
-                  >
-                    <span className="text-[10px] mb-1 z-10">{dia}</span>
-                    
-                    {registroDoDia && (
-                      <span className="text-lg leading-none z-10">{registroDoDia.emoji}</span>
-                    )}
-
-                    {sessaoDoDia && (
-                      <div className="absolute top-1 right-1 size-2.5 bg-blue-500 rounded-full shadow-sm border border-white animate-pulse" />
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            <div className="bg-peach-500 p-6 rounded-3xl text-white shadow-xl shadow-peach-300">
-              <div className="flex items-center gap-3 mb-2">
-                <CalendarIcon className="size-5 opacity-80" />
-                <h3 className="font-bold">Resumo do Mês</h3>
-              </div>
-              <p className="text-sm opacity-90 leading-relaxed">
-                Você teve {diasFelizes} dias <span className="font-bold">Felizes</span> este mês! 
-                {registros.length === 0 ? " Comece a registrar para ver seus insights." : " Continue acompanhando sua jornada."}
-              </p>
-            </div>
-          </>
-        )}
-      </motion.div>
-
-      {/* Modal Principal de Detalhes do Dia */}
-      <AnimatePresence>
-        {diaSelecionado && !mostrarModalReagendar && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setDiaSelecionado(null)} />
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-6 md:p-8 border border-white z-10 max-h-[90vh] overflow-y-auto custom-scrollbar"
+        {/* Card Principal do Calendário */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-app-card rounded-[2rem] sm:rounded-[2.75rem] border border-app-border shadow-xl p-4 sm:p-7 space-y-4 sm:space-y-6 relative overflow-hidden"
+        >
+          {/* Seletor do Mês */}
+          <div className="flex items-center justify-between border-b border-app-border pb-3 sm:pb-4">
+            <button 
+              type="button"
+              onClick={prevMonth} 
+              className="p-2 sm:p-2.5 rounded-2xl bg-app-bg hover:bg-app-border text-app-muted hover:text-app-primary transition-colors cursor-pointer"
+              title="Mês anterior"
             >
-              <button 
-                onClick={() => setDiaSelecionado(null)}
-                className="absolute top-5 right-5 p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors z-20"
-              >
-                <X className="size-5" />
-              </button>
+              <ChevronLeft size={18} className="sm:w-5 sm:h-5" />
+            </button>
 
-              <h2 className="text-center text-lg font-black text-slate-800 mb-6 border-b border-slate-100 pb-4">
-                Detalhes do dia {diaSelecionado.diaNumero}
-              </h2>
+            <div className="text-center capitalize">
+              <h2 className="text-lg sm:text-xl font-black text-app-text tracking-tight">{nomeMes} {ano}</h2>
+              <span className="text-[9px] sm:text-[10px] text-app-primary font-bold uppercase tracking-widest block mt-0.5">
+                Histórico de Humor
+              </span>
+            </div>
 
-              <div className="space-y-6">
-                
-                {diaSelecionado.sessao && (
-                  <div className="bg-blue-50 border border-blue-100 p-5 rounded-3xl space-y-4">
-                    <div className="flex items-center gap-2 text-blue-600 mb-2">
-                      <Video className="size-5" />
-                      <h3 className="font-black text-sm uppercase tracking-widest">Sessão Agendada</h3>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-slate-700 text-sm">
-                        <ClockIcon className="size-4 text-blue-400" />
-                        <span className="font-bold">{diaSelecionado.sessao.horario}</span>
-                      </div>
-                      <div className="flex items-start gap-2 text-slate-700 text-sm">
-                        <UserIcon className="size-4 text-blue-400 mt-0.5" />
-                        <div>
-                          <p className="font-bold">{diaSelecionado.sessao.psicologo}</p>
-                          <p className="text-[11px] text-slate-500">{diaSelecionado.sessao.especialidade}</p>
-                        </div>
-                      </div>
-                    </div>
+            <button 
+              type="button"
+              onClick={nextMonth} 
+              className="p-2 sm:p-2.5 rounded-2xl bg-app-bg hover:bg-app-border text-app-muted hover:text-app-primary transition-colors cursor-pointer"
+              title="Próximo mês"
+            >
+              <ChevronRight size={18} className="sm:w-5 sm:h-5" />
+            </button>
+          </div>
 
-                    <button 
-                      onClick={() => navigate(diaSelecionado.sessao.linkSala)}
-                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-md shadow-blue-500/30 transition-all flex items-center justify-center gap-2 active:scale-95"
+          {loading ? (
+            <div className="h-56 sm:h-64 flex flex-col items-center justify-center text-app-muted gap-2">
+              <Sparkles className="size-6 text-app-primary animate-pulse" />
+              <span className="text-xs font-medium">Carregando o seu calendário...</span>
+            </div>
+          ) : (
+            <>
+              {/* Grade dos Dias Ajustada para Mobile */}
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                {diasSemana.map((dia) => (
+                  <div key={dia} className="text-center text-[10px] sm:text-[11px] font-black text-app-muted uppercase tracking-wider py-0.5">
+                    {dia}
+                  </div>
+                ))}
+
+                {espacosVazios.map((espaco) => (
+                  <div key={`empty-${espaco}`} className="aspect-square" />
+                ))}
+
+                {diasArray.map((dia) => {
+                  const registroDoDia = registros.find(r => r.dataRegistro.getDate() === dia);
+                  const hoje = new Date();
+                  const ehHoje = 
+                    dia === hoje.getDate() && 
+                    currentDate.getMonth() === hoje.getMonth() && 
+                    currentDate.getFullYear() === hoje.getFullYear();
+
+                  return (
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      key={dia}
+                      onClick={() => {
+                        if (registroDoDia) {
+                          setRegistroSelecionado(registroDoDia);
+                        } else if (ehHoje) {
+                          navigate("/humor");
+                        }
+                      }}
+                      className={`min-h-[46px] sm:min-h-[58px] aspect-square flex items-center justify-center rounded-xl sm:rounded-2xl text-xs font-semibold transition-all relative select-none ${
+                        registroDoDia
+                          ? "bg-app-border/40 border border-app-border shadow-xs hover:shadow-md cursor-pointer text-app-text"
+                          : ehHoje
+                            ? "bg-app-card border-2 border-dashed border-app-primary text-app-primary cursor-pointer hover:bg-app-border/30"
+                            : "bg-app-bg/60 border border-app-border/40 text-app-muted/50 cursor-default"
+                      }`}
                     >
-                      <Video className="size-4" /> Entrar na Chamada
-                    </button>
-
-                    <div className="pt-3 border-t border-blue-200/50 space-y-3">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => setMostrarModalReagendar(true)}
-                          className="flex-1 py-2.5 bg-white border border-blue-100 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors flex items-center justify-center gap-1.5"
-                        >
-                          <CalendarClock size={14} /> Reagendar
-                        </button>
-                        <button 
-                          onClick={() => handleCancelarSessao(diaSelecionado.sessao.id)}
-                          className="flex-1 py-2.5 bg-white border border-red-100 text-red-500 rounded-xl text-xs font-bold hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
-                        >
-                          <CalendarX size={14} /> Cancelar
-                        </button>
-                      </div>
-                      <p className="text-[9px] font-medium text-blue-600/70 text-center leading-tight px-2">
-                        * Alterações ou cancelamentos só podem ser feitos com pelo menos <span className="font-bold">12 horas de antecedência</span>.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {diaSelecionado.registro && (
-                  <div className="space-y-4 bg-slate-50 border border-slate-100 p-5 rounded-3xl">
-                    <div className="text-center mb-4">
-                      <div className="text-5xl mb-2">{diaSelecionado.registro.emoji}</div>
-                      <h3 className="text-xl font-black text-slate-800">{diaSelecionado.registro.humor}</h3>
-                    </div>
-
-                    {diaSelecionado.registro.clima && (
-                      <div className="flex items-center gap-3 text-sm text-slate-600 bg-white p-3 rounded-xl border border-slate-100">
-                        <Sun className="size-4 text-peach-400" />
-                        <span className="font-medium">Clima:</span> {diaSelecionado.registro.clima.condicao}
-                      </div>
-                    )}
-                    
-                    {diaSelecionado.registro.fatores && diaSelecionado.registro.fatores.length > 0 && (
-                      <div className="flex items-start gap-3 text-sm text-slate-600 bg-white p-3 rounded-xl border border-slate-100">
-                        <Tag className="size-4 text-peach-400 mt-0.5" />
-                        <div>
-                          <span className="font-medium">Fatores:</span> 
-                          <div className="flex flex-wrap gap-1 mt-1.5">
-                            {diaSelecionado.registro.fatores.map(f => (
-                              <span key={f} className="bg-slate-50 px-2 py-1 rounded-md text-[10px] font-bold border border-slate-100 text-slate-500">{f}</span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {diaSelecionado.registro.nota && (
-                      <div className="pt-2">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">Anotações:</p>
-                        <p className="text-sm text-slate-600 italic bg-white p-4 rounded-2xl border border-slate-100">"{diaSelecionado.registro.nota}"</p>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 pt-2">
-                      <button 
-                        onClick={handleDeleteHumor}
-                        className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-red-500 bg-red-50 hover:bg-red-100 font-semibold transition-colors text-xs"
-                      >
-                        <Trash2 className="size-4" /> Apagar
-                      </button>
+                      {/* Número do dia fixo no canto superior esquerdo */}
+                      <span className={`absolute top-1 left-1.5 text-[9px] sm:text-[10px] leading-none ${ehHoje ? "font-black text-app-primary" : "text-app-muted"}`}>
+                        {dia}
+                      </span>
                       
-                      {verificarSeEhHoje(diaSelecionado.registro.dataRegistro) ? (
-                        <button 
-                          onClick={() => navigate("/humor", { state: { registroParaEditar: diaSelecionado.registro } })}
-                          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-peach-600 bg-peach-100 hover:bg-peach-200 font-semibold transition-colors text-xs"
-                        >
-                          <Edit3 className="size-4" /> Editar
-                        </button>
-                      ) : (
-                        <div className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-slate-400 bg-slate-100 cursor-not-allowed font-medium text-xs">
-                          <Lock className="size-3" /> Fechado
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                      {/* Emoji ou sinal de + no centro do card */}
+                      {registroDoDia ? (
+                        <span className="text-xl sm:text-2xl drop-shadow-xs pt-1.5 sm:pt-2">{registroDoDia.emoji}</span>
+                      ) : ehHoje ? (
+                        <span className="text-sm sm:text-base font-black text-app-primary pt-1">+</span>
+                      ) : null}
+                    </motion.div>
+                  );
+                })}
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
-      {/* Modal Secundário de Reagendamento com Mini-Calendário */}
+              {/* Resumo do Mês */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-app-primary text-white shadow-lg shadow-app-primary/20 flex items-start gap-3 sm:gap-3.5">
+                <div className="bg-white/20 p-2 sm:p-2.5 rounded-xl backdrop-blur-md shrink-0">
+                  <CalendarIcon className="size-4 sm:size-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-black">Resumo de {nomeMes}</h3>
+                  <p className="text-[11px] sm:text-xs text-white/90 mt-0.5 sm:mt-1 leading-relaxed">
+                    Registrou <strong className="text-white">{diasFelizes} dias felizes</strong> este mês. 
+                    {registros.length === 0 ? " Comece a registrar para obter análises detalhadas." : " Continue mantendo a regularidade do seu autocuidado!"}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </motion.div>
+
+      </div>
+
+      {/* Modal de Detalhes do Registro */}
       <AnimatePresence>
-        {mostrarModalReagendar && diaSelecionado?.sessao && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMostrarModalReagendar(false)} />
+        {registroSelecionado && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs" onClick={() => setRegistroSelecionado(null)} />
             
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl p-6 border border-white z-10"
+              className="relative bg-app-card w-full max-w-sm rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl p-5 sm:p-7 border border-app-border z-10 text-app-text"
             >
               <button 
-                onClick={() => setMostrarModalReagendar(false)}
-                className="absolute top-5 right-5 p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors z-20"
+                type="button"
+                onClick={() => setRegistroSelecionado(null)}
+                className="absolute top-4 right-4 p-2 bg-app-bg text-app-muted rounded-full hover:bg-app-border transition-colors cursor-pointer"
               >
                 <X className="size-5" />
               </button>
 
-              <div className="text-center mb-6 pt-2">
-                <div className="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 text-blue-500">
-                  <CalendarDays size={24} />
-                </div>
-                <h2 className="text-lg font-black text-slate-900">Agenda do Profissional</h2>
-                <p className="text-xs text-slate-500 font-medium mt-1">{diaSelecionado.sessao.psicologo}</p>
+              <div className="text-center mb-4 sm:mb-5 mt-1">
+                <div className="text-5xl sm:text-6xl mb-2 sm:mb-3">{registroSelecionado.emoji}</div>
+                <h3 className="text-xl sm:text-2xl font-black text-app-text">{registroSelecionado.humor}</h3>
+                <p className="text-xs text-app-muted font-medium mt-0.5 capitalize">
+                  {registroSelecionado.dataRegistro.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
+                </p>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-3 bg-app-bg p-3.5 sm:p-4 rounded-2xl mb-5 sm:mb-6 border border-app-border">
+                {registroSelecionado.clima && (
+                  <div className="flex items-center gap-2.5 text-xs text-app-text">
+                    <Sun className="size-4 text-app-primary" />
+                    <span className="font-bold">Clima:</span> {registroSelecionado.clima.condicao}
+                  </div>
+                )}
                 
-                <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
-                  <div className="flex justify-between items-center mb-3 px-1">
-                    <span className="text-xs font-bold text-slate-700 capitalize">{nomeMes} {ano}</span>
-                    <div className="flex gap-2">
-                      <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 uppercase"><div className="size-2 bg-emerald-400 rounded-full"></div> Livre</span>
-                      <span className="flex items-center gap-1 text-[9px] font-bold text-red-500 uppercase"><div className="size-2 bg-red-400 rounded-full"></div> Ocupado</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-7 gap-1">
-                    {diasSemana.map(d => (
-                      <div key={d} className="text-center text-[9px] font-bold text-slate-400 mb-1">{d.charAt(0)}</div>
-                    ))}
-                    {espacosVazios.map(e => (
-                      <div key={`empty-${e}`} className="aspect-square" />
-                    ))}
-                    {diasArray.map(dia => {
-                      const status = disponibilidadeDiasMock[dia];
-                      
-                      let btnClass = "bg-white text-slate-400 border-slate-100"; 
-                      let isDisabled = true;
-
-                      if (status === true) {
-                        btnClass = "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer shadow-sm";
-                        isDisabled = false;
-                      } else if (status === false) {
-                        btnClass = "bg-red-50/50 text-red-300 border-red-100 cursor-not-allowed";
-                      }
-
-                      const isSelected = novaDataReagendamento === dia;
-
-                      return (
-                        <button
-                          key={dia}
-                          disabled={isDisabled}
-                          onClick={() => setNovaDataReagendamento(dia)}
-                          className={`aspect-square rounded-lg flex items-center justify-center text-xs font-bold border transition-all ${btnClass} ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50 text-blue-600 border-blue-200 shadow-md' : ''}`}
-                        >
-                          {dia}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {novaDataReagendamento && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
-                      <label className="text-[10px] font-bold text-slate-400 ml-1 uppercase tracking-widest block mb-2">Horários para o dia {novaDataReagendamento}</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {horariosDisponiveisMock.map((hora) => (
-                          <button
-                            key={hora}
-                            onClick={() => setNovoHorarioReagendamento(hora)}
-                            className={`py-2 rounded-xl text-xs font-bold transition-all border ${
-                              novoHorarioReagendamento === hora 
-                                ? "bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20" 
-                                : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50"
-                            }`}
-                          >
-                            {hora}
-                          </button>
+                {registroSelecionado.fatores && registroSelecionado.fatores.length > 0 && (
+                  <div className="flex items-start gap-2.5 text-xs text-app-text">
+                    <Tag className="size-4 text-app-primary mt-0.5" />
+                    <div>
+                      <span className="font-bold">Fatores:</span> 
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {registroSelecionado.fatores.map(f => (
+                          <span key={f} className="bg-app-card px-2 py-0.5 rounded-md text-[11px] border border-app-border font-medium text-app-text">{f}</span>
                         ))}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                )}
 
-                <div className="pt-2 flex gap-2">
-                  <button 
-                    onClick={() => {
-                      setMostrarModalReagendar(false);
-                      setNovaDataReagendamento(null);
-                      setNovoHorarioReagendamento("");
-                    }}
-                    className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors"
-                  >
-                    Voltar
-                  </button>
-                  <button 
-                    onClick={confirmarReagendamento}
-                    className="flex-1 py-3.5 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/30 hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <Check size={16} /> Confirmar
-                  </button>
+                {registroSelecionado.nota && (
+                  <div className="pt-2 border-t border-app-border">
+                    <p className="text-[10px] font-bold text-app-muted uppercase tracking-wider mb-1">Anotações:</p>
+                    <p className="text-xs text-app-text italic">"{registroSelecionado.nota}"</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  
+                  {verificarSeEhHoje(registroSelecionado.dataRegistro) ? (
+                    <button 
+                      type="button"
+                      onClick={() => navigate("/humor", { state: { registroParaEditar: registroSelecionado } })}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-app-primary text-white font-bold text-xs hover:opacity-90 transition-opacity cursor-pointer shadow-md shadow-app-primary/20"
+                    >
+                      <Edit3 className="size-4" /> Editar
+                    </button>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl text-app-muted bg-app-bg cursor-not-allowed font-bold text-xs border border-app-border">
+                      <Lock className="size-3.5" />
+                      Não editável
+                    </div>
+                  )}
                 </div>
+                
+                {!verificarSeEhHoje(registroSelecionado.dataRegistro) && (
+                  <p className="text-[10px] text-center text-app-muted mt-1 uppercase tracking-widest font-bold">
+                    Apenas os registros de hoje podem ser alterados.
+                  </p>
+                )}
               </div>
             </motion.div>
           </div>
